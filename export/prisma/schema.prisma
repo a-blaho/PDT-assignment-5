@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model annotations {
+  id              BigInt        @id @default(autoincrement())
+  conversation_id BigInt
+  value           String
+  type            String
+  probability     Decimal       @db.Decimal(4, 3)
+  conversations   conversations @relation(fields: [conversation_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model authors {
+  id              BigInt          @id(map: "PK_d2ed02fabd9b52847ccb85e6b88")
+  username        String?         @db.VarChar(255)
+  description     String?
+  followers_count Int?
+  following_count Int?
+  tweet_count     Int?
+  listed_count    Int?
+  name            String?         @db.VarChar(255)
+  conversations   conversations[]
+
+  @@index([followers_count], map: "followers_count")
+  @@index([name], map: "name")
+}
+
+model context_annotations {
+  id                BigInt           @id @default(autoincrement())
+  conversation_id   BigInt
+  context_domain_id BigInt
+  context_entity_id BigInt
+  context_domains   context_domains  @relation(fields: [context_domain_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  context_entities  context_entities @relation(fields: [context_entity_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  conversations     conversations    @relation(fields: [conversation_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model context_domains {
+  id                  BigInt                @id @default(autoincrement())
+  name                String                @db.VarChar(255)
+  description         String?
+  context_annotations context_annotations[]
+}
+
+model context_entities {
+  id                  BigInt                @id @default(autoincrement())
+  name                String                @db.VarChar(255)
+  description         String?
+  context_annotations context_annotations[]
+}
+
+model conversation_hashtags {
+  id              BigInt        @id @default(autoincrement())
+  conversation_id BigInt
+  hashtag_id      BigInt
+  conversations   conversations @relation(fields: [conversation_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  hashtags        hashtags      @relation(fields: [hashtag_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model conversation_references {
+  id              BigInt        @id @default(autoincrement())
+  conversation    conversations @relation("conversation", fields: [conversation_id], references: [id])
+  conversation_id BigInt
+  parent          conversations @relation("parent", fields: [parent_id], references: [id])
+  parent_id       BigInt
+  type            String        @db.VarChar(20)
+}
+
+model conversations {
+  id                    BigInt                    @id
+  author_id             BigInt
+  content               String
+  possibly_sensitive    Boolean
+  language              String                    @db.VarChar(3)
+  source                String
+  retweet_count         Int?
+  reply_count           Int?
+  like_count            Int?
+  quote_count           Int?
+  created_at            DateTime                  @db.Timestamptz(6)
+  annotations           annotations[]
+  context_annotations   context_annotations[]
+  conversation_hashtags conversation_hashtags[]
+  authors               authors                   @relation(fields: [author_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  links                 links[]
+  referenced            conversation_references[] @relation("conversation")
+  parented              conversation_references[] @relation("parent")
+
+  @@index([content], map: "content")
+  @@index([retweet_count], map: "retweet_count")
+}
+
+model hashtags {
+  id                    BigInt                  @id @default(autoincrement())
+  tag                   String                  @unique
+  conversation_hashtags conversation_hashtags[]
+}
+
+model links {
+  id              BigInt        @id @default(autoincrement())
+  conversation_id BigInt
+  url             String        @db.VarChar(2048)
+  title           String?
+  description     String?
+  conversations   conversations @relation(fields: [conversation_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}

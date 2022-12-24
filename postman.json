@@ -1,0 +1,442 @@
+{
+  "info": {
+    "_postman_id": "703ffec6-405a-4230-be4b-e23283df4f7a",
+    "name": "elasticsearch",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "24536982"
+  },
+  "item": [
+    {
+      "name": "2",
+      "item": [
+        {
+          "name": "index",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"settings\": {\n    \"index\": {\n      \"number_of_shards\": 3,  \n      \"number_of_replicas\": 1 \n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://localhost:9200/tweets",
+              "protocol": "https",
+              "host": ["localhost"],
+              "port": "9200",
+              "path": ["tweets"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3",
+      "item": [
+        {
+          "name": "mapping",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"properties\": {\n        \"id\": {\"type\": \"long\"},\n        \"author\": {\n            \"properties\": {\n                \"id\": {\"type\": \"long\"},\n                \"username\": {\"type\": \"text\"},\n                \"description\": {\"type\": \"text\"},\n                \"followers_count\": {\"type\": \"integer\"},\n                \"following_count\": {\"type\": \"integer\"},\n                \"tweet_count\": {\"type\": \"integer\"},\n                \"listed_count\": {\"type\": \"integer\"},\n                \"name\": {\"type\": \"text\"}\n            }\n        },\n        \"content\": {\"type\": \"text\"},\n        \"possibly_sensitive\": {\"type\": \"boolean\"},\n        \"language\": {\"type\": \"text\"},\n        \"source\": {\"type\": \"text\"},\n        \"retweet_count\": {\"type\": \"integer\"},\n        \"reply_count\": {\"type\": \"integer\"},\n        \"like_count\": {\"type\": \"integer\"},\n        \"quote_count\": {\"type\": \"integer\"},\n        \"created_at\": {\"type\": \"date\"},\n        \"annotations\": {\n            \"type\": \"nested\",\n            \"properties\": {\n                \"id\": {\"type\": \"long\"},\n                \"value\": {\"type\": \"text\"},\n                \"type\": {\"type\": \"text\"},\n                \"probability\": {\"type\": \"float\"}\n            }\n        },\n        \"context_annotations\": {\n            \"type\": \"nested\",\n            \"properties\": {\n                \"context_domain\": {\n                    \"properties\": {\n                        \"id\": {\"type\": \"long\"},\n                        \"name\": { \"type\": \"text\" },\n                        \"description\": {\"type\": \"text\"}\n                    }\n                },\n                \"context_entity\": {\n                    \"properties\": {\n                        \"id\": {\"type\": \"long\"},\n                        \"name\": { \"type\": \"text\" },\n                        \"description\": {\"type\": \"text\"}\n                    }\n                }\n            }\n        },\n        \"hashtags\": {\n            \"type\": \"text\"\n        },\n        \"links\": {\n            \"type\": \"nested\",\n            \"properties\": {\n                \"url\": {\"type\": \"text\"},\n                \"title\": {\"type\": \"text\"},\n                \"description\": {\"type\": \"text\"}\n            }\n        },\n        \"references\": {\n            \"type\": \"nested\",\n            \"properties\": {\n                \"id\": {\"type\": \"long\"},\n                \"type\": {\"type\": \"text\"},\n                \"author\": {\n                    \"properties\": {\n                        \"id\": {\"type\": \"long\"},\n                        \"name\": {\"type\": \"text\"},\n                        \"username\": {\"type\": \"text\"}\n                    }\n                },\n                \"content\": {\"type\": \"text\"},\n                \"hashtags\": {\"type\": \"text\"}\n            }\n        }\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://localhost:9200/tweets/_mapping",
+              "protocol": "https",
+              "host": ["localhost"],
+              "port": "9200",
+              "path": ["tweets", "_mapping"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4",
+      "item": [
+        {
+          "name": "close",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:9200/tweets/_close",
+              "protocol": "https",
+              "host": ["localhost"],
+              "port": "9200",
+              "path": ["tweets", "_close"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "analyzers",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"analysis\": {\n        \"analyzer\": {\n            \"englando\": {\n                \"type\": \"custom\",\n                \"filter\": [\"english_possessive_stemmer\", \"lowercase\", \"english_stop\", \"english_stemmer\"],\n                \"char_filter\": [\"html_strip\"],\n                \"tokenizer\": \"standard\"\n            },\n            \"custom_ngram\": {\n                \"type\": \"custom\",\n                \"filter\": [\"lowercase\", \"asciifolding\", \"filter_ngrams\"],\n                \"char_filter\": [\"html_strip\"],\n                \"tokenizer\": \"standard\"\n            },\n            \"custom_shingles\": {\n                \"type\": \"custom\",\n                \"filter\": [\"lowercase\", \"asciifolding\", \"filter_shingles\"],\n                \"char_filter\": [\"html_strip\"],\n                \"tokenizer\": \"standard\"\n            },\n            \"lowercase\": {\n                \"type\": \"standard\",\n                \"filter\": [\"lowercase\"]\n            }\n        },\n        \"filter\": {\n           \"english_possessive_stemmer\": {\n                \"type\": \"stemmer\",\n                \"language\": \"possessive_english\"\n            },\n            \"english_stop\":{\n                \"type\":\"stop\",\n                \"stopwords\":\"_english_\"\n            },\n            \"english_stemmer\": {\n                \"type\": \"stemmer\",\n                \"language\": \"english\"\n            },\n            \"filter_ngrams\": {\n                \"type\": \"ngram\",\n                \"min_ngram\": 1,\n                \"max_ngram\": 10\n            },\n            \"filter_shingles\": {\n                \"type\": \"shingle\",\n                \"min_shingle_size\": 3,\n                \"max_shingle_size\": 5,\n                \"token_separator\": \"\"\n            }\n        }\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://localhost:9200/tweets/_settings",
+              "protocol": "https",
+              "host": ["localhost"],
+              "port": "9200",
+              "path": ["tweets", "_settings"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "mapping",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"properties\": {\n    \"id\": {\n      \"type\": \"long\"\n    },\n    \"author\": {\n      \"properties\": {\n        \"id\": {\n          \"type\": \"long\"\n        },\n        \"username\": {\n          \"properties\": {\n            \"englando\": {\n              \"type\": \"text\",\n              \"analyzer\": \"englando\"\n            },\n            \"ngram\": {\n              \"type\": \"text\",\n              \"analyzer\": \"custom_ngram\"\n            }\n          }\n        },\n        \"description\": {\n          \"properties\": {\n            \"englando\": {\n              \"type\": \"text\",\n              \"analyzer\": \"englando\"\n            },\n            \"shingles\": {\n              \"type\": \"text\",\n              \"analyzer\": \"custom_shingles\"\n            }\n          }\n        },\n        \"followers_count\": {\n          \"type\": \"integer\"\n        },\n        \"following_count\": {\n          \"type\": \"integer\"\n        },\n        \"tweet_count\": {\n          \"type\": \"integer\"\n        },\n        \"listed_count\": {\n          \"type\": \"integer\"\n        },\n        \"name\": {\n          \"properties\": {\n            \"englando\": {\n              \"type\": \"text\",\n              \"analyzer\": \"englando\"\n            },\n            \"ngram\": {\n              \"type\": \"text\",\n              \"analyzer\": \"custom_ngram\"\n            },\n            \"shingles\": {\n              \"type\": \"text\",\n              \"analyzer\": \"custom_shingles\"\n            }\n          }\n        }\n      }\n    },\n    \"content\": {\n      \"type\": \"text\",\n      \"analyzer\": \"englando\"\n    },\n    \"possibly_sensitive\": {\n      \"type\": \"boolean\"\n    },\n    \"language\": {\n      \"type\": \"text\",\n      \"analyzer\": \"englando\"\n    },\n    \"source\": {\n      \"type\": \"text\",\n      \"analyzer\": \"englando\"\n    },\n    \"retweet_count\": {\n      \"type\": \"integer\"\n    },\n    \"reply_count\": {\n      \"type\": \"integer\"\n    },\n    \"like_count\": {\n      \"type\": \"integer\"\n    },\n    \"quote_count\": {\n      \"type\": \"integer\"\n    },\n    \"created_at\": {\n      \"type\": \"date\"\n    },\n    \"annotations\": {\n      \"type\": \"nested\",\n      \"properties\": {\n        \"id\": {\n          \"type\": \"long\"\n        },\n        \"value\": {\n          \"type\": \"text\",\n          \"analyzer\": \"englando\"\n        },\n        \"type\": {\n          \"type\": \"text\",\n          \"analyzer\": \"englando\"\n        },\n        \"probability\": {\n          \"type\": \"float\"\n        }\n      }\n    },\n    \"context_annotations\": {\n      \"type\": \"nested\",\n      \"properties\": {\n        \"context_domain\": {\n          \"properties\": {\n            \"id\": {\n              \"type\": \"long\"\n            },\n            \"name\": {\n              \"type\": \"text\",\n              \"analyzer\": \"englando\"\n            },\n            \"description\": {\n              \"type\": \"text\",\n              \"analyzer\": \"englando\"\n            }\n          }\n        },\n        \"context_entity\": {\n          \"properties\": {\n            \"id\": {\n              \"type\": \"long\"\n            },\n            \"name\": {\n              \"type\": \"text\",\n              \"analyzer\": \"englando\"\n            },\n            \"description\": {\n              \"type\": \"text\",\n              \"analyzer\": \"englando\"\n            }\n          }\n        }\n      }\n    },\n    \"hashtags\": {\n      \"type\": \"text\",\n      \"analyzer\": \"lowercase\"\n    },\n    \"links\": {\n      \"type\": \"nested\",\n      \"properties\": {\n        \"url\": {\n          \"type\": \"text\",\n          \"analyzer\": \"englando\"\n        },\n        \"title\": {\n          \"type\": \"text\",\n          \"analyzer\": \"englando\"\n        },\n        \"description\": {\n          \"type\": \"text\",\n          \"analyzer\": \"englando\"\n        }\n      }\n    },\n    \"references\": {\n      \"type\": \"nested\",\n      \"properties\": {\n        \"id\": {\n          \"type\": \"long\"\n        },\n        \"type\": {\n          \"type\": \"text\",\n          \"analyzer\": \"englando\"\n        },\n        \"author\": {\n          \"properties\": {\n            \"id\": {\n              \"type\": \"long\"\n            },\n            \"name\": {\n              \"properties\": {\n                \"englando\": {\n                  \"type\": \"text\",\n                  \"analyzer\": \"englando\"\n                },\n                \"ngram\": {\n                  \"type\": \"text\",\n                  \"analyzer\": \"custom_ngram\"\n                },\n                \"shingles\": {\n                  \"type\": \"text\",\n                  \"analyzer\": \"custom_shingles\"\n                }\n              }\n            },\n            \"username\": {\n              \"properties\": {\n                \"englando\": {\n                  \"type\": \"text\",\n                  \"analyzer\": \"englando\"\n                },\n                \"ngram\": {\n                  \"type\": \"text\",\n                  \"analyzer\": \"custom_ngram\"\n                }\n              }\n            }\n          }\n        },\n        \"content\": {\n          \"type\": \"text\",\n          \"analyzer\": \"englando\"\n        },\n        \"hashtags\": {\n          \"type\": \"text\",\n          \"analyzer\": \"lowercase\"\n        }\n      }\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://localhost:9200/tweets/_mapping",
+              "protocol": "https",
+              "host": ["localhost"],
+              "port": "9200",
+              "path": ["tweets", "_mapping"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "open",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:9200/tweets/_open",
+              "protocol": "https",
+              "host": ["localhost"],
+              "port": "9200",
+              "path": ["tweets", "_open"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "7",
+      "item": [
+        {
+          "name": "search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:9200/tweets/_doc/1323782404",
+              "protocol": "https",
+              "host": ["localhost"],
+              "port": "9200",
+              "path": ["tweets", "_doc", "1323782404"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://localhost:9200/tweets/_doc/",
+              "protocol": "https",
+              "host": ["localhost"],
+              "port": "9200",
+              "path": ["tweets", "_doc", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": {\n    \"match\": {\n      \"id\": 1\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://localhost:9200/tweets/_delete_by_query",
+              "protocol": "https",
+              "host": ["localhost"],
+              "port": "9200",
+              "path": ["tweets", "_delete_by_query"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "8.",
+      "item": [
+        {
+          "name": "update",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"script\" : {\n    \"source\": \"ctx._source.retweet_count += params.count\",\n    \"lang\": \"painless\",\n    \"params\" : {\n      \"count\" : 4\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://localhost:9200/tweets/_update/1323782404",
+              "protocol": "https",
+              "host": ["localhost"],
+              "port": "9200",
+              "path": ["tweets", "_update", "1323782404"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "10",
+      "item": [
+        {
+          "name": "a",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": {\n    \"bool\": {\n      \"must\": [\n        {\n          \"multi_match\": {\n            \"query\": \"put1n chr1stian fake jew\",\n            \"fields\": [\n              \"author.description.shingles^10\",\n              \"content^6\"\n            ],\n            \"fuzzy_transpositions\": \"true\",\n            \"operator\": \"OR\"\n          }\n        },\n        {\n          \"nested\": {\n            \"path\": \"references\",\n            \"query\": {\n              \"bool\": {\n                \"must\": {\n                  \"match\": {\n                    \"references.content\": \"nazi\"\n                  }\n                }\n              }\n            }\n          }\n        },\n        {\n          \"match\": {\n            \"hashtags\": \"ukraine\"\n          }\n        }\n      ]\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://localhost:9200/_search",
+              "protocol": "https",
+              "host": ["localhost"],
+              "port": "9200",
+              "path": ["_search"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "b",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "  {\n    \"query\": {\n      \"bool\": {\n        \"filter\": [\n          {\n            \"range\": {\n              \"author.following_count\": {\n                \"gt\": 100\n              }\n            }\n          },\n          {\n            \"range\": {\n              \"author.followers_count\": {\n                \"gt\": 100\n              }\n            }\n          },\n          {\n            \"nested\": {\n              \"path\": \"links\",\n              \"query\": {\n                \"bool\": {\n                  \"filter\": [\n                    {\n                      \"exists\": {\n                        \"field\": \"links.url\"\n                      }\n                    }\n                  ]\n                }\n              }\n            }\n          }\n        ]\n      }\n    }\n  }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://localhost:9200/_search",
+              "protocol": "https",
+              "host": ["localhost"],
+              "port": "9200",
+              "path": ["_search"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "c",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": {\n    \"bool\": {\n      \"should\": [\n        {\n          \"nested\": {\n            \"path\": \"context_annotations\",\n            \"query\": {\n              \"bool\": {\n                \"should\": [\n                  {\n                    \"match\": {\n                      \"context_annotations.context_domain.name\": {\n                        \"boost\": 5,\n                        \"query\": \"Person\"\n                      }\n                    }\n                  },\n                  {\n                    \"match\": {\n                      \"context_annotations.context_entity.name\": {\n                        \"boost\": 5,\n                        \"query\": \"Soros\"\n                      }\n                    }\n                  }\n                ]\n              }\n            }\n          }\n        },\n        {\n          \"multi_match\": {\n            \"query\": \"put1n chr1stian fake jew\",\n            \"fields\": [\n              \"author.description.shingles\",\n              \"content\"\n            ],\n            \"fuzzy_transpositions\": \"true\",\n            \"operator\": \"OR\",\n            \"boost\": 5,\n            \"type\": \"phrase\"\n          }\n        }\n      ]\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://localhost:9200/_search",
+              "protocol": "https",
+              "host": ["localhost"],
+              "port": "9200",
+              "path": ["_search"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "d",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"size\": 0,\n  \"query\": {\n    \"bool\": {\n      \"must\": [\n        {\n          \"terms\": {\n            \"hashtags\": [\n              \"istandwithputin\",\n              \"racism\",\n              \"1trillion\",\n              \"istandwithrussia\",\n              \"isupportrussia\",\n              \"blacklivesmatter\",\n              \"racism\",\n              \"racistukraine\",\n              \"africansinukraine\",\n              \"palestine\",\n              \"israel\",\n              \"freepalestine\",\n              \"istandwithpalestine\",\n              \"racisteu\",\n              \"putin\"\n            ]\n          }\n        }\n      ]\n    }\n  },\n  \"aggs\": {\n    \"pro_russia\": {\n      \"date_histogram\": {\n        \"field\": \"created_at\",\n        \"calendar_interval\": \"week\"\n      }\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://localhost:9200/_search",
+              "protocol": "https",
+              "host": ["localhost"],
+              "port": "9200",
+              "path": ["_search"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Helpers",
+      "item": [
+        {
+          "name": "delete",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:9200/tweets",
+              "protocol": "https",
+              "host": ["localhost"],
+              "port": "9200",
+              "path": ["tweets"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:9200/tweets/_count",
+              "protocol": "https",
+              "host": ["localhost"],
+              "port": "9200",
+              "path": ["tweets", "_count"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "nodes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://localhost:9200/_cat/nodes",
+              "protocol": "https",
+              "host": ["localhost"],
+              "port": "9200",
+              "path": ["_cat", "nodes"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "basic",
+    "basic": [
+      {
+        "key": "password",
+        "value": "password",
+        "type": "string"
+      },
+      {
+        "key": "username",
+        "value": "elastic",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ]
+}
